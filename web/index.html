@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Outback DataSafe</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Login Page -->
+        <div id="login-page" class="page">
+            <div class="auth-container">
+                <h1>Outback DataSafe</h1>
+                <div class="auth-tabs">
+                    <button class="tab-btn active" data-tab="login">Login</button>
+                    <button class="tab-btn" data-tab="register">Register</button>
+                </div>
+                
+                <form id="login-form" class="auth-form">
+                    <input type="text" id="login-username" placeholder="Username" required>
+                    <input type="password" id="login-password" placeholder="Password" required>
+                    <button type="submit">Login</button>
+                </form>
+                
+                <form id="register-form" class="auth-form hidden">
+                    <input type="text" id="register-username" placeholder="Username" required>
+                    <input type="email" id="register-email" placeholder="Email" required>
+                    <input type="password" id="register-password" placeholder="Password" required>
+                    <input type="password" id="register-confirm-password" placeholder="Confirm Password" required>
+                    <button type="submit">Register</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Main Application -->
+        <div id="main-app" class="page hidden">
+            <nav class="sidebar">
+                <div class="logo">DataSafe</div>
+                <ul class="nav-menu">
+                    <li class="nav-item active" data-view="files">
+                        <span class="icon">📁</span>
+                        <span>Files</span>
+                    </li>
+                    <li class="nav-item" data-view="photos">
+                        <span class="icon">📷</span>
+                        <span>Photos</span>
+                    </li>
+                </ul>
+                <div class="user-info">
+                    <div class="quota-info">
+                        <div class="quota-bar">
+                            <div class="quota-used" id="quota-used"></div>
+                        </div>
+                        <span id="quota-text">0 GB / 1 TB</span>
+                    </div>
+                    <button id="logout-btn">Logout</button>
+                </div>
+            </nav>
+
+            <main class="content">
+                <!-- Files View -->
+                <div id="files-view" class="view active">
+                    <div class="toolbar">
+                        <button id="upload-btn">📤 Upload</button>
+                        <button id="new-folder-btn">📁 New Folder</button>
+                        <input type="file" id="file-input" multiple style="display: none;">
+                    </div>
+                    <div class="breadcrumb" id="breadcrumb"></div>
+                    <div class="file-grid" id="file-grid"></div>
+                </div>
+
+                <!-- Photos View -->
+                <div id="photos-view" class="view">
+                    <div class="toolbar">
+                        <button id="upload-photo-btn">📷 Upload Photos</button>
+                        <input type="file" id="photo-input" multiple accept="image/*" style="display: none;">
+                    </div>
+                    <div class="photo-grid" id="photo-grid"></div>
+                </div>
+            </main>
+        </div>
+
+        <!-- Photo Viewer Modal -->
+        <div id="photo-modal" class="modal hidden">
+            <button class="close-btn">&times;</button>
+            <img id="modal-photo" src="" alt="">
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
