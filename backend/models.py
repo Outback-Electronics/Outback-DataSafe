@@ -6,7 +6,7 @@ class UserCreate(BaseModel):
     username: str
     email: EmailStr
     password: str
-    quota: Optional[int] = None
+    tier: Optional[str] = "free"
 
 class UserLogin(BaseModel):
     username: str

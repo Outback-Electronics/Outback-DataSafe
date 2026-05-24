@@ -20,8 +20,17 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 1 week
     
-    # User quotas (in bytes)
-    DEFAULT_USER_QUOTA: int = 1 * 1024 * 1024 * 1024 * 1024  # 1 TB
+    # Storage tiers/plans (in bytes)
+    STORAGE_TIERS: dict = {
+        "free": 15 * 1024 * 1024 * 1024,      # 15GB free
+        "basic": 100 * 1024 * 1024 * 1024,     # 100GB
+        "standard": 200 * 1024 * 1024 * 1024,  # 200GB
+        "premium": 2 * 1024 * 1024 * 1024 * 1024,  # 2TB
+        "ultimate": 10 * 1024 * 1024 * 1024 * 1024  # 10TB
+    }
+    
+    # Default tier for new users
+    DEFAULT_TIER: str = os.getenv("DEFAULT_TIER", "free")
     
     # Photo settings
     MAX_PHOTO_SIZE: int = 50 * 1024 * 1024  # 50 MB

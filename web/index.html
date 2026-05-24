@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Outback DataSafe</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
     <div id="app">
@@ -28,7 +28,14 @@
                     <input type="email" id="register-email" placeholder="Email" required>
                     <input type="password" id="register-password" placeholder="Password" required>
                     <input type="password" id="register-confirm-password" placeholder="Confirm Password" required>
-                    <button type="submit">Register</button>
+                    <button type="submit" id="continue-to-plans">Continue</button>
+                </form>
+
+                <form id="plans-form" class="auth-form hidden">
+                    <h2>Choose Your Storage Plan</h2>
+                    <div class="plans-grid" id="plans-grid"></div>
+                    <button type="submit" id="complete-registration">Complete Registration</button>
+                    <button type="button" id="back-to-register">Back</button>
                 </form>
             </div>
         </div>
@@ -45,6 +52,10 @@
                     <li class="nav-item" data-view="photos">
                         <span class="icon">📷</span>
                         <span>Photos</span>
+                    </li>
+                    <li class="nav-item" data-view="settings">
+                        <span class="icon">⚙️</span>
+                        <span>Settings</span>
                     </li>
                 </ul>
                 <div class="user-info">
@@ -78,6 +89,57 @@
                     </div>
                     <div class="photo-grid" id="photo-grid"></div>
                 </div>
+
+                <!-- Settings View -->
+                <div id="settings-view" class="view">
+                    <div class="settings-container">
+                        <h2>Account Settings</h2>
+                        <div class="settings-section">
+                            <h3>Storage Plan</h3>
+                            <div class="current-plan">
+                                <span class="plan-label">Current Plan:</span>
+                                <span class="plan-value" id="current-plan">Free</span>
+                            </div>
+                            <div class="storage-usage">
+                                <span class="usage-label">Storage Used:</span>
+                                <span class="usage-value" id="storage-used">0 GB</span>
+                                <span class="usage-label"> / </span>
+                                <span class="usage-value" id="storage-total">15 GB</span>
+                            </div>
+                            <div class="quota-bar-container">
+                                <div class="quota-bar">
+                                    <div class="quota-used" id="settings-quota-used"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="settings-section">
+                            <h3>Account Information</h3>
+                            <div class="account-info">
+                                <div class="info-row">
+                                    <span class="info-label">Username:</span>
+                                    <span class="info-value" id="settings-username">-</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Email:</span>
+                                    <span class="info-value" id="settings-email">-</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="settings-section">
+                            <h3>Change Password</h3>
+                            <form id="change-password-form">
+                                <input type="password" id="current-password" placeholder="Current Password" required>
+                                <input type="password" id="new-password" placeholder="New Password" required>
+                                <input type="password" id="confirm-new-password" placeholder="Confirm New Password" required>
+                                <button type="submit">Change Password</button>
+                            </form>
+                        </div>
+                        <div class="settings-section">
+                            <h3>Upgrade Plan</h3>
+                            <div class="plans-grid" id="settings-plans-grid"></div>
+                        </div>
+                    </div>
+                </div>
             </main>
         </div>
 
@@ -88,6 +150,6 @@
         </div>
     </div>
 
-    <script src="app.js"></script>
+    <script src="/static/app.js"></script>
 </body>
 </html>

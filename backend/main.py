@@ -1,8 +1,9 @@
 from fastapi import FastAPI, Depends, HTTPException, status, UploadFile, File, Form
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse as FastAPIFileResponse, JSONResponse
 from contextlib import asynccontextmanager
+from typing import List
 import aiofiles
 import os
 import uuid
@@ -30,11 +31,13 @@ person_manager = PersonManager(db)
 async def lifespan(app: FastAPI):
     # Create default admin user if not exists
     if db.get_user("admin") is None:
+        admin_quota = settings.STORAGE_TIERS.get(settings.DEFAULT_TIER, settings.STORAGE_TIERS["free"])
         db.create_user(
             username="admin",
             email="admin@localhost",
             password_hash=get_password_hash("admin123"),
-            quota=settings.DEFAULT_USER_QUOTA,
+            quota=admin_quota,
+            tier=settings.DEFAULT_TIER,
             is_admin=True
         )
     yield
@@ -65,13 +68,17 @@ async def register(user: UserCreate):
         raise HTTPException(status_code=400, detail="Username already exists")
     
     password_hash = get_password_hash(user.password)
-    quota = user.quota or settings.DEFAULT_USER_QUOTA
+    
+    # Get quota from selected tier
+    tier = user.tier or settings.DEFAULT_TIER
+    quota = settings.STORAGE_TIERS.get(tier, settings.STORAGE_TIERS[settings.DEFAULT_TIER])
     
     user_id = db.create_user(
         username=user.username,
         email=user.email,
         password_hash=password_hash,
-        quota=quota
+        quota=quota,
+        tier=tier
     )
     
     return UserResponse(**db.get_user_by_id(user_id))
@@ -94,6 +101,10 @@ async def login(user: UserLogin):
 async def get_me(current_user: dict = Depends(get_current_user)):
     user = db.get_user_by_id(current_user["user_id"])
     return UserResponse(**user)
+
+@app.get("/api/storage/tiers")
+async def get_storage_tiers():
+    return settings.STORAGE_TIERS
 
 # File endpoints
 @app.post("/api/files", response_model=FileResponse)
@@ -157,6 +168,9 @@ async def list_files(
     parent_id: int = None,
     current_user: dict = Depends(get_current_user)
 ):
+    # Handle empty string parent_id
+    if parent_id == "" or parent_id is None:
+        parent_id = None
     files = db.get_files(current_user["user_id"], parent_id)
     return [FileResponse(**file) for file in files]
 
@@ -182,7 +196,7 @@ async def download_file(
     if file["is_directory"]:
         raise HTTPException(status_code=400, detail="Cannot download directory")
     
-    return FileResponse(
+    return FastAPIFileResponse(
         path=file["file_path"],
         filename=file["original_filename"],
         media_type=file["mime_type"]
@@ -310,7 +324,7 @@ async def get_photo(
     if not photo:
         raise HTTPException(status_code=404, detail="Photo not found")
     
-    return FileResponse(
+    return FastAPIFileResponse(
         path=photo["file_path"],
         media_type="image/jpeg"
     )
@@ -326,7 +340,7 @@ async def get_photo_thumbnail(
     if not photo or not photo["thumbnail_path"]:
         raise HTTPException(status_code=404, detail="Photo or thumbnail not found")
     
-    return FileResponse(
+    return FastAPIFileResponse(
         path=photo["thumbnail_path"],
         media_type="image/jpeg"
     )
@@ -386,7 +400,7 @@ async def get_photos_by_person(
 # Serve web interface
 @app.get("/")
 async def root():
-    return FileResponse("web/index.html")
+    return FastAPIFileResponse("web/index.html")
 
 if __name__ == "__main__":
     import uvicorn

@@ -36,6 +36,7 @@ class Database:
                     password_hash TEXT NOT NULL,
                     quota INTEGER NOT NULL,
                     used_space INTEGER DEFAULT 0,
+                    tier TEXT DEFAULT 'free',
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     is_admin BOOLEAN DEFAULT FALSE
                 )
@@ -126,12 +127,12 @@ class Database:
             cursor.execute("CREATE INDEX IF NOT EXISTS idx_faces_photo_id ON faces(photo_id)")
             cursor.execute("CREATE INDEX IF NOT EXISTS idx_faces_person_id ON faces(person_id)")
     
-    def create_user(self, username: str, email: str, password_hash: str, quota: int, is_admin: bool = False) -> int:
+    def create_user(self, username: str, email: str, password_hash: str, quota: int, tier: str = "free", is_admin: bool = False) -> int:
         with self.get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute(
-                "INSERT INTO users (username, email, password_hash, quota, is_admin) VALUES (?, ?, ?, ?, ?)",
-                (username, email, password_hash, quota, is_admin)
+                "INSERT INTO users (username, email, password_hash, quota, tier, is_admin) VALUES (?, ?, ?, ?, ?, ?)",
+                (username, email, password_hash, quota, tier, is_admin)
             )
             return cursor.lastrowid
     

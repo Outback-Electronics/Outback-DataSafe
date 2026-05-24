@@ -69,14 +69,16 @@ python client.py
 
 ### Backend Configuration
 
-Edit `backend/config.py` to customize:
+Edit `backend/config.py` or set environment variables to customize:
 
 - `HOST`: Server host (default: 0.0.0.0)
 - `PORT`: Server port (default: 8000)
 - `STORAGE_DIR`: Base storage directory
-- `DEFAULT_USER_QUOTA`: Default storage quota per user (default: 1TB)
+- `DEFAULT_USER_QUOTA`: Default storage quota per user (default: 100GB, set via `DEFAULT_USER_QUOTA` env var)
 - `MAX_PHOTO_SIZE`: Maximum photo upload size (default: 50MB)
 - `SECRET_KEY`: JWT signing key (change this in production!)
+
+**Note:** The quota is a soft limit per user, not a requirement for physical storage. The system will work with any amount of available disk space - it just prevents users from storing more than their allocated quota.
 
 ### Storage Structure
 

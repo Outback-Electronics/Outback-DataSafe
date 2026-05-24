@@ -78,6 +78,144 @@ body {
     background: #2980b9;
 }
 
+.plans-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.plan-card {
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.plan-card:hover {
+    border-color: #3498db;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.plan-card.selected {
+    border-color: #3498db;
+    background: #e8f4f8;
+}
+
+.plan-name {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.plan-storage {
+    font-size: 24px;
+    font-weight: bold;
+    color: #3498db;
+    margin-bottom: 5px;
+}
+
+.plan-price {
+    font-size: 14px;
+    color: #666;
+}
+
+/* Settings Page */
+.settings-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.settings-container h2 {
+    margin-bottom: 30px;
+    color: #2c3e50;
+}
+
+.settings-section {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.settings-section h3 {
+    margin-bottom: 15px;
+    color: #3498db;
+}
+
+.current-plan, .storage-usage {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    font-size: 16px;
+}
+
+.plan-label, .usage-label {
+    font-weight: bold;
+    margin-right: 10px;
+    color: #666;
+}
+
+.plan-value, .usage-value {
+    color: #2c3e50;
+}
+
+.quota-bar-container {
+    margin-top: 15px;
+}
+
+.account-info {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.info-label {
+    font-weight: bold;
+    color: #666;
+}
+
+.info-value {
+    color: #2c3e50;
+}
+
+#change-password-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#change-password-form input {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+#change-password-form button {
+    padding: 10px;
+    background: #3498db;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#change-password-form button:hover {
+    background: #2980b9;
+}
+
 .hidden {
     display: none !important;
 }

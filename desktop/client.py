@@ -5,7 +5,7 @@ from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                                QHBoxLayout, QLabel, QLineEdit, QPushButton, 
                                QListWidget, QFileDialog, QTabWidget, QProgressBar,
                                QMessageBox, QSplitter, QStatusBar, QMenu, QToolBar)
-from PySide6.QtCore import Qt, QThread, Signal
+from PySide6.QtCore import Qt, QThread, Signal, QSize
 from PySide6.QtGui import QIcon, QAction
 
 class APIClient:
@@ -210,11 +210,13 @@ class LoginWindow(QWidget):
         username = self.username_input.text()
         password = self.password_input.text()
         
-        if self.client.login(username, password):
-            self.on_login_success()
-            self.close()
-        else:
-            QMessageBox.warning(self, "Login Failed", "Invalid username or password")
+        try:
+            if self.client.login(username, password):
+                self.on_login_success()
+            else:
+                QMessageBox.warning(self, "Login Failed", "Invalid username or password")
+        except Exception as e:
+            QMessageBox.warning(self, "Login Error", f"An error occurred: {str(e)}")
     
     def handle_register(self):
         username = self.username_input.text()
@@ -237,7 +239,11 @@ class MainWindow(QMainWindow):
         self.client = client
         self.current_parent_id = None
         self.path_history = []
-        self.init_ui()
+        try:
+            self.init_ui()
+        except Exception as e:
+            print(f"Error initializing UI: {e}")
+            raise
     
     def init_ui(self):
         self.setWindowTitle("Outback DataSafe")
@@ -309,7 +315,7 @@ class MainWindow(QMainWindow):
         
         self.photos_list = QListWidget()
         self.photos_list.setViewMode(QListWidget.IconMode)
-        self.photos_list.setIconSize(200, 200)
+        self.photos_list.setIconSize(QSize(200, 200))
         self.photos_list.setResizeMode(QListWidget.Adjust)
         photos_layout.addWidget(self.photos_list)
         
@@ -442,10 +448,18 @@ def main():
     login_window = LoginWindow(client, lambda: None)
     login_window.show()
     
+    # Keep reference to main window to prevent garbage collection
+    main_window = None
+    
     def on_login():
-        main_window = MainWindow(client)
-        main_window.show()
-        login_window.close()
+        nonlocal main_window
+        try:
+            main_window = MainWindow(client)
+            main_window.show()
+            login_window.close()
+        except Exception as e:
+            QMessageBox.critical(None, "Error", f"Failed to initialize main window: {str(e)}")
+            print(f"Error creating main window: {e}")
     
     login_window.on_login_success = on_login
     

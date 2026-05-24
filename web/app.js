@@ -5,6 +5,8 @@ let currentUser = null;
 let currentPath = [];
 let currentParentId = null;
 let authToken = localStorage.getItem('authToken');
+let selectedTier = 'free';
+let registrationData = {};
 
 // DOM Elements
 const loginPage = document.getElementById('login-page');
@@ -66,8 +68,8 @@ function setupEventListeners() {
         }
     });
 
-    // Register form
-    registerForm.addEventListener('submit', async (e) => {
+    // Register form - continue to plans
+    document.getElementById('continue-to-plans').addEventListener('click', async (e) => {
         e.preventDefault();
         const username = document.getElementById('register-username').value;
         const email = document.getElementById('register-email').value;
@@ -79,16 +81,42 @@ function setupEventListeners() {
             return;
         }
         
+        // Store registration data
+        registrationData = { username, email, password };
+        
+        // Load and display plans
+        await loadPlans();
+        
+        // Show plans form
+        registerForm.classList.add('hidden');
+        document.getElementById('plans-form').classList.remove('hidden');
+    });
+
+    // Back to register
+    document.getElementById('back-to-register').addEventListener('click', () => {
+        document.getElementById('plans-form').classList.add('hidden');
+        registerForm.classList.remove('hidden');
+    });
+
+    // Complete registration
+    document.getElementById('complete-registration').addEventListener('click', async (e) => {
+        e.preventDefault();
+        
         try {
             const response = await fetch(`${API_BASE}/auth/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, email, password })
+                body: JSON.stringify({ 
+                    ...registrationData,
+                    tier: selectedTier
+                })
             });
             
             if (response.ok) {
                 alert('Registration successful! Please login.');
                 document.querySelector('[data-tab="login"]').click();
+                document.getElementById('plans-form').classList.add('hidden');
+                registerForm.classList.remove('hidden');
             } else {
                 alert('Registration failed');
             }
@@ -119,6 +147,8 @@ function setupEventListeners() {
                 loadFiles();
             } else if (item.dataset.view === 'photos') {
                 loadPhotos();
+            } else if (item.dataset.view === 'settings') {
+                loadSettings();
             }
         });
     });
@@ -425,5 +455,134 @@ async function showPhotoModal(photoId) {
         }
     } catch (error) {
         console.error('Failed to load photo:', error);
+    }
+}
+
+async function loadPlans() {
+    try {
+        const response = await fetch(`${API_BASE}/storage/tiers`);
+        if (response.ok) {
+            const tiers = await response.json();
+            const plansGrid = document.getElementById('plans-grid');
+            plansGrid.innerHTML = '';
+            
+            const tierNames = {
+                'free': 'Free',
+                'basic': 'Basic',
+                'standard': 'Standard',
+                'premium': 'Premium',
+                'ultimate': 'Ultimate'
+            };
+            
+            Object.entries(tiers).forEach(([tier, bytes]) => {
+                const card = document.createElement('div');
+                card.className = 'plan-card';
+                if (tier === selectedTier) {
+                    card.classList.add('selected');
+                }
+                
+                const storageGB = bytes / (1024 ** 3);
+                const storageText = storageGB >= 1024 ? `${(storageGB / 1024).toFixed(0)} TB` : `${storageGB.toFixed(0)} GB`;
+                
+                card.innerHTML = `
+                    <div class="plan-name">${tierNames[tier]}</div>
+                    <div class="plan-storage">${storageText}</div>
+                    <div class="plan-price">${tier === 'free' ? 'Free' : 'Coming Soon'}</div>
+                `;
+                
+                card.addEventListener('click', () => {
+                    document.querySelectorAll('.plan-card').forEach(c => c.classList.remove('selected'));
+                    card.classList.add('selected');
+                    selectedTier = tier;
+                });
+                
+                plansGrid.appendChild(card);
+            });
+        }
+    } catch (error) {
+        console.error('Failed to load plans:', error);
+    }
+}
+
+async function loadSettings() {
+    try {
+        // Load user info
+        const response = await fetch(`${API_BASE}/auth/me`, {
+            headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+        
+        if (response.ok) {
+            const user = await response.json();
+            
+            // Update account info
+            document.getElementById('settings-username').textContent = user.username;
+            document.getElementById('settings-email').textContent = user.email;
+            
+            // Update storage info
+            const tierNames = {
+                'free': 'Free',
+                'basic': 'Basic',
+                'standard': 'Standard',
+                'premium': 'Premium',
+                'ultimate': 'Ultimate'
+            };
+            
+            const currentTier = user.tier || 'free';
+            document.getElementById('current-plan').textContent = tierNames[currentTier] || 'Free';
+            
+            const usedGB = user.used_space / (1024 ** 3);
+            const totalGB = user.quota / (1024 ** 3);
+            
+            document.getElementById('storage-used').textContent = `${usedGB.toFixed(2)} GB`;
+            document.getElementById('storage-total').textContent = totalGB >= 1024 ? `${(totalGB / 1024).toFixed(0)} TB` : `${totalGB.toFixed(0)} GB`;
+            
+            const percentage = (user.used_space / user.quota) * 100;
+            document.getElementById('settings-quota-used').style.width = `${percentage}%`;
+            
+            // Load upgrade plans
+            await loadUpgradePlans(currentTier);
+        }
+    } catch (error) {
+        console.error('Failed to load settings:', error);
+    }
+}
+
+async function loadUpgradePlans(currentTier) {
+    try {
+        const response = await fetch(`${API_BASE}/storage/tiers`);
+        if (response.ok) {
+            const tiers = await response.json();
+            const plansGrid = document.getElementById('settings-plans-grid');
+            plansGrid.innerHTML = '';
+            
+            const tierNames = {
+                'free': 'Free',
+                'basic': 'Basic',
+                'standard': 'Standard',
+                'premium': 'Premium',
+                'ultimate': 'Ultimate'
+            };
+            
+            Object.entries(tiers).forEach(([tier, bytes]) => {
+                // Only show plans that are upgrades
+                if (tier !== currentTier) {
+                    const card = document.createElement('div');
+                    card.className = 'plan-card';
+                    
+                    const storageGB = bytes / (1024 ** 3);
+                    const storageText = storageGB >= 1024 ? `${(storageGB / 1024).toFixed(0)} TB` : `${storageGB.toFixed(0)} GB`;
+                    
+                    card.innerHTML = `
+                        <div class="plan-name">${tierNames[tier]}</div>
+                        <div class="plan-storage">${storageText}</div>
+                        <div class="plan-price">Coming Soon</div>
+                    `;
+                    
+                    plansGrid.appendChild(card);
+                }
+            });
+        }
+    } catch (error) {
+        console.error('Failed to load upgrade plans:', error);
     }
 }
